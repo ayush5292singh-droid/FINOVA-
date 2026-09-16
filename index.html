@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="theme-color" content="#070B14">
+
+<title>FINANCE MANAGER</title>
+
+<link rel="stylesheet" href="style.css">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+</head>
+
+<body>
+
+<div id="toast"></div>
+
+<div class="app">
+
+<header class="topbar">
+
+    <div class="brand-area">
+        <div class="logo">FM</div>
+
+        <div>
+            <div class="brand">
+                FINANCE<span>MANAGER</span>
+            </div>
+
+            <div class="tagline">
+                SMART MONEY CONTROL
+            </div>
+        </div>
+    </div>
+
+    <div class="header-actions">
+        <button class="header-btn" onclick="openScanner()">▣</button>
+        <button class="header-btn" onclick="toggleTheme()">☼</button>
+    </div>
+
+</header>
+
+
+<main>
+
+
+<!-- ================= HOME ================= -->
+
+<section id="page-home" class="page active">
+
+<div class="welcome">
+    <div>
+        <span class="eyebrow">FINANCIAL OVERVIEW</span>
+        <h1>Good evening.</h1>
+        <p id="currentDate"></p>
+    </div>
+
+    <div class="status-dot">
+        <i></i> LOCAL DATA
+    </div>
+</div>
+
+
+<div class="balance-card">
+
+    <div class="balance-top">
+        <span>TOTAL BALANCE</span>
+        <button onclick="openAccounts()">MANAGE</button>
+    </div>
+
+    <div class="balance-number" id="homeBalance">
+        ₹0
+    </div>
+
+    <div class="balance-stats">
+
+        <div>
+            <small>INCOME</small>
+            <strong class="positive" id="homeIncome">₹0</strong>
+        </div>
+
+        <div>
+            <small>EXPENSES</small>
+            <strong class="negative" id="homeExpense">₹0</strong>
+        </div>
+
+        <div>
+            <small>SAVINGS</small>
+            <strong id="homeSavings">₹0</strong>
+        </div>
+
+    </div>
+
+</div>
+
+
+<div class="quick-actions">
+
+    <button onclick="openTransaction('income')">
+        <span class="qa-icon income-bg">＋</span>
+        <b>Income</b>
+    </button>
+
+    <button onclick="openTransaction('expense')">
+        <span class="qa-icon expense-bg">−</span>
+        <b>Expense</b>
+    </button>
+
+    <button onclick="openTransfer()">
+        <span class="qa-icon transfer-bg">⇄</span>
+        <b>Transfer</b>
+    </button>
+
+    <button onclick="openScanner()">
+        <span class="qa-icon scan-bg">▣</span>
+        <b>Scan</b>
+    </button>
+
+</div>
+
+
+<div class="section-head">
+    <div>
+        <span class="eyebrow">THIS MONTH</span>
+        <h2>Money flow</h2>
+    </div>
+
+    <button onclick="showPage('insights')">Details →</button>
+</div>
+
+
+<div class="card chart-card">
+    <canvas id="moneyChart"></canvas>
+</div>
+
+
+<div class="home-grid">
+
+    <div class="mini-card">
+        <span class="mini-icon">◫</span>
+        <div>
+            <small>BUDGET USED</small>
+            <strong id="budgetUsed">0%</strong>
+        </div>
+    </div>
+
+    <div class="mini-card">
+        <span class="mini-icon">◎</span>
+        <div>
+            <small>TRANSACTIONS</small>
+            <strong id="homeTransactionCount">0</strong>
+        </div>
+    </div>
+
+</div>
+
+
+<div class="section-head">
+    <div>
+        <span class="eyebrow">ACTIVITY</span>
+        <h2>Recent transactions</h2>
+    </div>
+
+    <button onclick="showPage('transactions')">See all →</button>
+</div>
+
+<div id="homeTransactions"></div>
+
+
+<div class="section-head">
+    <div>
+        <span class="eyebrow">PLANNING</span>
+        <h2>Upcoming</h2>
+    </div>
+</div>
+
+<div id="homeUpcoming"></div>
+
+
+</section>
+
+
+
+<!-- ================= TRANSACTIONS ================= -->
+
+<section id="page-transactions" class="page">
+
+<div class="page-heading">
+    <div>
+        <span class="eyebrow">MONEY ACTIVITY</span>
+        <h1>Transactions</h1>
+    </div>
+
+    <button class="primary-btn" onclick="openTransaction('expense')">
+        ＋ Add
+    </button>
+</div>
+
+
+<div class="search-box">
+    <span>⌕</span>
+    <input
+        id="transactionSearch"
+        oninput="renderTransactions()"
+        placeholder="Search transactions..."
+    >
+</div>
+
+
+<div class="filter-tabs">
+
+    <button class="active" onclick="changeTransactionFilter('all',this)">
+        All
+    </button>
+
+    <button onclick="changeTransactionFilter('income',this)">
+        Income
+    </button>
+
+    <button onclick="changeTransactionFilter('expense',this)">
+        Expenses
+    </button>
+
+    <button onclick="changeTransactionFilter('transfer',this)">
+        Transfers
+    </button>
+
+</div>
+
+
+<div class="transaction-summary">
+
+    <div>
+        <small>RECORDS</small>
+        <strong id="recordCount">0</strong>
+    </div>
+
+    <div>
+        <small>INCOME</small>
+        <strong class="positive" id="transactionIncome">₹0</strong>
+    </div>
+
+    <div>
+        <small>EXPENSE</small>
+        <strong class="negative" id="transactionExpense">₹0</strong>
+    </div>
+
+</div>
+
+
+<div id="transactionList"></div>
+
+</section>
+
+
+
+<!-- ================= BUDGETS ================= -->
+
+<section id="page-budgets" class="page">
+
+<div class="page-heading">
+
+    <div>
+        <span class="eyebrow">CONTROL YOUR SPENDING</span>
+        <h1>Budgets</h1>
+    </div>
+
+    <button class="primary-btn" onclick="openBudget()">
+        ＋ Budget
+    </button>
+
+</div>
+
+
+<div class="budget-overview">
+
+    <div>
+        <small>MONTHLY LIMIT</small>
+        <strong id="totalBudget">₹0</strong>
+    </div>
+
+    <div>
+        <small>SPENT</small>
+        <strong id="totalBudgetSpent">₹0</strong>
+    </div>
+
+    <div>
+        <small>REMAINING</small>
+        <strong id="budgetRemaining">₹0</strong>
+    </div>
+
+</div>
+
+
+<div class="section-head">
+    <div>
+        <span class="eyebrow">LIMITS</span>
+        <h2>Your budgets</h2>
+    </div>
+</div>
+
+<div id="budgetList"></div>
+
+
+<div class="section-head">
+    <div>
+        <span class="eyebrow">GOALS</span>
+        <h2>Savings goals</h2>
+    </div>
+
+    <button onclick="openGoal()">＋ Add goal</button>
+</div>
+
+<div id="goalList"></div>
+
+
+</section>
+
+
+
+<!-- ================= INSIGHTS ================= -->
+
+<section id="page-insights" class="page">
+
+<div class="page-heading">
+
+    <div>
+        <span class="eyebrow">ANALYSIS</span>
+        <h1>Insights</h1>
+    </div>
+
+    <button class="primary-btn" onclick="generateReport()">
+        Report
+    </button>
+
+</div>
+
+
+<div class="health-card">
+
+    <div>
+        <span class="eyebrow">FINANCIAL HEALTH</span>
+        <h2 id="healthScore">--</h2>
+    </div>
+
+    <div>
+        <p id="healthText">
+            Add transactions to generate your analysis.
+        </p>
+    </div>
+
+</div>
+
+
+<div class="section-head">
+    <div>
+        <span class="eyebrow">BREAKDOWN</span>
+        <h2>Where your money goes</h2>
+    </div>
+</div>
+
+<div class="card chart-card">
+    <canvas id="categoryChart"></canvas>
+</div>
+
+
+<div class="section-head">
+    <div>
+        <span class="eyebrow">SMART ANALYSIS</span>
+        <h2>Insights</h2>
+    </div>
+</div>
+
+<div id="smartInsights"></div>
+
+
+<div class="section-head">
+    <div>
+        <span class="eyebrow">TOOLS</span>
+        <h2>Finance tools</h2>
+    </div>
+</div>
+
+
+<div class="tool-grid">
+
+    <button onclick="openAccounts()">
+        <span>🏦</span>
+        Accounts
+    </button>
+
+    <button onclick="openRecurring()">
+        <span>↻</span>
+        Recurring
+    </button>
+
+    <button onclick="openLoans()">
+        <span>▣</span>
+        Loans & EMI
+    </button>
+
+    <button onclick="openCalendar()">
+        <span>▦</span>
+        Calendar
+    </button>
+
+</div>
+
+</section>
+
+
+
+<!-- ================= SETTINGS ================= -->
+
+<section id="page-settings" class="page">
+
+<div class="page-heading">
+
+    <div>
+        <span class="eyebrow">CONTROL CENTER</span>
+        <h1>Settings</h1>
+    </div>
+
+</div>
+
+
+<!-- PREMIUM -->
+
+<div class="premium-card">
+
+    <div class="premium-top">
+
+        <div class="pro-logo">PRO</div>
+
+        <div>
+            <span class="eyebrow">FINANCE MANAGER</span>
+            <h2>Premium</h2>
+        </div>
+
+    </div>
+
+
+    <p>
+        Unlock advanced analytics, receipt scanning,
+        unlimited planning tools and more.
+    </p>
+
+
+    <div class="premium-features">
+
+        <span>✓ Smart Receipt OCR</span>
+        <span>✓ Advanced Analytics</span>
+        <span>✓ Unlimited Budgets</span>
+        <span>✓ Advanced Reports</span>
+        <span>✓ Smart Insights</span>
+        <span>✓ Premium Themes</span>
+
+    </div>
+
+
+    <button class="premium-btn" onclick="openPremium()">
+        VIEW PREMIUM PLANS
+    </button>
+
+</div>
+
+
+
+<div class="settings-group">
+
+    <div class="settings-title">
+        MONEY
+    </div>
+
+    <button onclick="openAccounts()">
+        <span class="settings-icon">🏦</span>
+        <div>
+            <b>Accounts</b>
+            <small>Cash, bank, UPI and wallets</small>
+        </div>
+        <i>›</i>
+    </button>
+
+    <button onclick="openRecurring()">
+        <span class="settings-icon">↻</span>
+        <div>
+            <b>Recurring payments</b>
+            <small>Track subscriptions and bills</small>
+        </div>
+        <i>›</i>
+    </button>
+
+    <button onclick="openLoans()">
+        <span class="settings-icon">▣</span>
+        <div>
+            <b>Loans & EMI</b>
+            <small>Track outstanding payments</small>
+        </div>
+        <i>›</i>
+    </button>
+
+</div>
+
+
+<div class="settings-group">
+
+    <div class="settings-title">
+        DATA
+    </div>
+
+    <button onclick="exportData()">
+        <span class="settings-icon">↑</span>
+        <div>
+            <b>Export data</b>
+            <small>Download your finance data</small>
+        </div>
+        <i>›</i>
+    </button>
+
+    <button onclick="restoreData()">
+        <span class="settings-icon">↓</span>
+        <div>
+            <b>Restore backup</b>
+            <small>Import previous data</small>
+        </div>
+        <i>›</i>
+    </button>
+
+</div>
+
+
+<div class="settings-group">
+
+    <div class="settings-title">
+        APP
+    </div>
+
+    <button onclick="openScanner()">
+        <span class="settings-icon">▣</span>
+        <div>
+            <b>Receipt Scanner</b>
+            <small>Scan receipts using OCR</small>
+        </div>
+        <i>›</i>
+    </button>
+
+    <button onclick="toggleTheme()">
+        <span class="settings-icon">☼</span>
+        <div>
+            <b>Appearance</b>
+            <small>Switch light/dark theme</small>
+        </div>
+        <i>›</i>
+    </button>
+
+    <button onclick="showAbout()">
+        <span class="settings-icon">ⓘ</span>
+        <div>
+            <b>About Finance Manager</b>
+            <small>Version 2.0 MAX</small>
+        </div>
+        <i>›</i>
+    </button>
+
+</div>
+
+</section>
+
+</main>
+
+
+
+<!-- BOTTOM NAVIGATION -->
+
+<nav class="bottom-nav">
+
+<button class="nav-btn active" onclick="showPage('home',this)">
+    <span>⌂</span>
+    <small>Home</small>
+</button>
+
+<button class="nav-btn" onclick="showPage('transactions',this)">
+    <span>↕</span>
+    <small>Transactions</small>
+</button>
+
+<button class="nav-btn" onclick="showPage('budgets',this)">
+    <span>◫</span>
+    <small>Budgets</small>
+</button>
+
+<button class="nav-btn" onclick="showPage('insights',this)">
+    <span>◉</span>
+    <small>Insights</small>
+</button>
+
+<button class="nav-btn" onclick="showPage('settings',this)">
+    <span>⚙</span>
+    <small>Settings</small>
+</button>
+
+</nav>
+
+
+<button class="floating-add" onclick="openTransaction('expense')">
+    ＋
+</button>
+
+</div>
+
+
+<!-- MODAL -->
+
+<div id="modal" class="modal">
+
+<div class="modal-box">
+
+<button class="modal-close" onclick="closeModal()">×</button>
+
+<div id="modalContent"></div>
+
+</div>
+
+</div>
+
+
+<script src="script.js"></script>
+
+</body>
+</html>
